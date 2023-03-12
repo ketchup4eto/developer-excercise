@@ -20,6 +20,7 @@ public class Groceries {
     @Column(name = "price")
     private int price;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "deal")
-    private Enum<Deals> deal;
+    private Deals deal;
 }

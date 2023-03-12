@@ -3,6 +3,7 @@ package com.exercise.cloudruid.services;
 import com.exercise.cloudruid.models.Groceries;
 import com.exercise.cloudruid.repositories.GroceriesRepository;
 import com.exercise.cloudruid.services.contracts.GroceriesService;
+import com.exercise.cloudruid.utils.enums.Deals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.exercise.cloudruid.utils.exceptions.GrocerieNotFoundException;
@@ -41,7 +42,7 @@ public class GroceriesServiceImpl implements GroceriesService {
     public void create(Groceries item) {
         if (repository.existsByName(item.getName()))
             throw new ItemExistsException("Item with name: " + item.getName() + " already exists");
-
+        item.setDeal(Deals.NONE);
         repository.saveAndFlush(item);
     }
 
