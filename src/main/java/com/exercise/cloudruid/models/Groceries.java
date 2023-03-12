@@ -1,8 +1,8 @@
 package com.exercise.cloudruid.models;
 
+import com.exercise.cloudruid.utils.enums.Deals;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Setter;
 
 @Data
 @Entity(name = "Groceries")
@@ -18,11 +18,8 @@ public class Groceries {
     private String name;
 
     @Column(name = "price")
-    private @Setter double price;
+    private int price;
 
-    @Column(name = "2_for_3")
-    private @Setter boolean twoForThree;
-
-    @Column(name = "buy_1_get_1_half_price")
-    private @Setter boolean buyOneGetOneHalfPrice;
+    @Column(name = "deal")
+    private Enum<Deals> deal;
 }
