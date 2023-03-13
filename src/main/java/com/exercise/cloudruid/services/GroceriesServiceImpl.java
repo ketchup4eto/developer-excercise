@@ -67,6 +67,8 @@ public class GroceriesServiceImpl implements GroceriesService {
 
     @Override
     public void delete(Groceries item) {
+        if (!repository.existsByName(item.getName()))
+            throw new GrocerieNotFoundException("The item you are trying to delete does not exist!");
         repository.delete(item);
     }
 }
