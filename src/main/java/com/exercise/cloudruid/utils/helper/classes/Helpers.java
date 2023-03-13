@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Helpers {
+    /**
+     * This method is used to parse a JSON array with item names to a regular String list.
+     * @param itemNames this is the raw JSON array
+     * @return a list of Strings that are ready to used
+     * @throws ParseException when the JSON is not formatted properly and cannot be parsed
+     */
     public static List<String> parseJsonList(String itemNames) throws ParseException {
         JSONParser parser = new JSONParser(itemNames);
         ObjectMapper objectMapper = new ObjectMapper();
