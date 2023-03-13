@@ -4,6 +4,7 @@ import com.exercise.cloudruid.models.Groceries;
 import com.exercise.cloudruid.repositories.GroceriesRepository;
 import com.exercise.cloudruid.services.contracts.GroceriesService;
 import com.exercise.cloudruid.utils.enums.Deals;
+import com.exercise.cloudruid.utils.exceptions.InvalidPriceFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.exercise.cloudruid.utils.exceptions.GrocerieNotFoundException;
@@ -40,6 +41,9 @@ public class GroceriesServiceImpl implements GroceriesService {
 
     @Override
     public void create(Groceries item) {
+        if (item.getPrice() <= 0) {
+            throw new InvalidPriceFormatException("Price should be a positive number!");
+        }
         if (repository.existsByName(item.getName()))
             throw new ItemExistsException("Item with name: " + item.getName() + " already exists");
         item.setDeal(Deals.NONE);
@@ -53,9 +57,11 @@ public class GroceriesServiceImpl implements GroceriesService {
         }
     }
 
-    //TODO test to see if this actually works
     @Override
     public Groceries update(Groceries item) {
+        if (item.getPrice() <= 0) {
+            throw new InvalidPriceFormatException("Price should be a positive number!");
+        }
         return repository.saveAndFlush(item);
     }
 
