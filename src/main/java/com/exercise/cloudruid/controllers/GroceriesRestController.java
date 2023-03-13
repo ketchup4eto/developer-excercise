@@ -92,17 +92,18 @@ public class GroceriesRestController {
         return "Items created successfully!";
     }
 
-    //TODO fix tomorrow
-    @PutMapping("/update/{name}/{newPrice}")
-    public String updatePrice(@PathVariable String name, @PathVariable String newPrice) {
+    @PutMapping("/update")
+    public String updatePrice(@RequestBody GroceriesInOutDto dto) {
         try {
-            Groceries itemToUpdate = groceriesService.getByName(name);
-            String[] price = newPrice.split(" ");
-            if (price[1].equals("aws"))
+            Groceries itemToUpdate = groceriesService.getByName(dto.getName());
+            String[] price = dto.getPrice().split(" ");
+            if (price[1].equals("aws")) {
                 itemToUpdate.setPrice((int) (Double.parseDouble(price[0]) * 100));
-            else if (price[1].equals("c"))
+                groceriesService.update(itemToUpdate);
+            } else if (price[1].equals("c")) {
                 itemToUpdate.setPrice(Integer.parseInt(price[0]));
-            else throw new InvalidPriceFormatException("Price format should be the following: 1,34 aws or 50 c");
+                groceriesService.update(itemToUpdate);
+            } else throw new InvalidPriceFormatException("Price format should be the following: 1,34 aws or 50 c");
         } catch (GrocerieNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
