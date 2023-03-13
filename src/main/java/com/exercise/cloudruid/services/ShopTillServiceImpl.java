@@ -36,11 +36,12 @@ public class ShopTillServiceImpl implements ShopTillService {
     @Override
     public void addToCart(String itemName) {
         Groceries item = groceriesService.getByName(itemName);
-        if (shoppingCart.getCart().get(Deals.TWOFORTHREE).size() != 3)
+        if (shoppingCart.getCart().get(Deals.TWOFORTHREE).size() != 3
+                && item.getDeal() == Deals.TWOFORTHREE)
             shoppingCart.getCart().get(Deals.TWOFORTHREE).add(item);
-        else if (item.getDeal() == Deals.TWOFORTHREE)
-            shoppingCart.getCart().get(Deals.NONE).add(item);
-        else shoppingCart.getCart().get(item.getDeal()).add(item);
+        else if (item.getDeal() == Deals.BUYONEGETONEHALFPRICE)
+            shoppingCart.getCart().get(Deals.BUYONEGETONEHALFPRICE).add(item);
+        else shoppingCart.getCart().get(Deals.NONE).add(item);
     }
 
     @Override
@@ -127,8 +128,10 @@ public class ShopTillServiceImpl implements ShopTillService {
                 promoCount.put(item.getName(), promoCount.get(item.getName()) + 1);
         }
         for (Map.Entry<String, Integer> s : promoCount.entrySet()) {
-            if (s.getValue() % 2 == 1)
+            if (s.getValue() % 2 == 1) {
                 s.setValue(s.getValue() - 1);
+                finalPrice += groceriesService.getByName(s.getKey()).getPrice();
+            }
             while (s.getValue() != 0) {
                 if (s.getValue() % 2 == 0) {
                     finalPrice += groceriesService.getByName(s.getKey()).getPrice();
