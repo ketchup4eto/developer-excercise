@@ -35,7 +35,7 @@ public class DealsServiceImpl implements DealsService {
     public void addToDealBuyOneGetOneHalfPrice(List<String> itemNames) {
         for (String itemName : itemNames) {
             Groceries item = groceriesService.getByName(itemName);
-            if (item.getDeal() != Deals.BUYONEGETONEHALFPRICE)
+            if (item.getDeal() != Deals.NONE)
                 throw new ItemDealException("Item is already included in a promotion!");
             item.setDeal(Deals.BUYONEGETONEHALFPRICE);
             groceriesService.update(item);
@@ -47,6 +47,7 @@ public class DealsServiceImpl implements DealsService {
         for (String itemName : itemNames) {
             Groceries item = groceriesService.getByName(itemName);
             item.setDeal(Deals.NONE);
+            groceriesService.update(item);
         }
     }
 }

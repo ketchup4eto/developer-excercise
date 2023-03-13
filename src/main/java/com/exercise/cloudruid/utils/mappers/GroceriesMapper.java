@@ -21,6 +21,6 @@ public class GroceriesMapper {
     }
 
     public GroceriesInOutDto groceriesToDto(Groceries item) {
-        return new GroceriesInOutDto(item.getName(), item.getPrice() / 100 +" aws");
+        return new GroceriesInOutDto(item.getName(), (double) (item.getPrice()) / 100 + " aws");
     }
 }

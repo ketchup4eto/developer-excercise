@@ -5,6 +5,7 @@ import com.exercise.cloudruid.models.ShoppingCart;
 import com.exercise.cloudruid.services.contracts.GroceriesService;
 import com.exercise.cloudruid.services.contracts.ShopTillService;
 import com.exercise.cloudruid.utils.enums.Deals;
+import com.exercise.cloudruid.utils.exceptions.ItemNotInCartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,19 +36,19 @@ public class ShopTillServiceImpl implements ShopTillService {
     @Override
     public void addToCart(String itemName) {
         Groceries item = groceriesService.getByName(itemName);
-        if (shoppingCart.getCart().get(Deals.TWOFORTHREE).size() == 3)
+        if (shoppingCart.getCart().get(Deals.TWOFORTHREE).size() != 3)
             shoppingCart.getCart().get(Deals.TWOFORTHREE).add(item);
         else if (item.getDeal() == Deals.TWOFORTHREE)
             shoppingCart.getCart().get(Deals.NONE).add(item);
         else shoppingCart.getCart().get(item.getDeal()).add(item);
-        totalCostOfCart();
     }
 
     @Override
     public void removeFromCart(String itemName) {
         Groceries item = groceriesService.getByName(itemName);
+        if (!shoppingCart.getCart().get(item.getDeal()).contains(item))
+            throw new ItemNotInCartException("The item you are trying to remove is not you cart");
         shoppingCart.getCart().get(item.getDeal()).remove(item);
-        totalCostOfCart();
     }
 
     @Override
@@ -66,17 +67,28 @@ public class ShopTillServiceImpl implements ShopTillService {
 
     @Override
     public String totalCostOfCart() {
-        int price = 0;
+        double price = 0;
         price += buyOneGetOneHalfPrice(shoppingCart.getCart().get(Deals.BUYONEGETONEHALFPRICE));
         price += twoForThree(shoppingCart.getCart().get(Deals.TWOFORTHREE));
         for (Groceries groceries : shoppingCart.getCart().get(Deals.NONE)) {
             price += groceries.getPrice();
         }
-        String[] stringOfPrice = String.valueOf(price / 100).split(",");
-        return String.format("%s aws and %s clouds", stringOfPrice[0], stringOfPrice[1]);
+        if (price < 100) {
+            return String.format("%.0f clouds", price);
+        } else {
+            price /= 100;
+            return String.format("%.2f aws", price);
+        }
     }
 
     private int twoForThree(List<Groceries> items) {
+        if (items.size() < 3) {
+            int price = 0;
+            for (Groceries item : items) {
+                price += item.getPrice();
+            }
+            return price;
+        }
         if (items.get(0).getPrice() < items.get(1).getPrice()
                 && items.get(0).getPrice() < items.get(2).getPrice()) {
             return items.get(1).getPrice() + items.get(2).getPrice();
@@ -93,18 +105,23 @@ public class ShopTillServiceImpl implements ShopTillService {
         else if (items.size() == 1)
             return items.get(0).getPrice();
         int finalPrice = 0;
-        Map<String, Integer> promoCount= new HashMap<>();
+        Map<String, Integer> promoCount = new HashMap<>();
         for (Groceries item : items) {
             if (!promoCount.containsKey(item.getName()))
                 promoCount.put(item.getName(), 1);
             else
-                promoCount.put(item.getName(), promoCount.get(item.getName())+1);
+                promoCount.put(item.getName(), promoCount.get(item.getName()) + 1);
         }
         for (Map.Entry<String, Integer> s : promoCount.entrySet()) {
-            for (int i = 0; i < s.getValue(); i++) {
-                if (promoCount.get(s)%2 == 1)
+            if (s.getValue() % 2 == 1)
+                s.setValue(s.getValue() - 1);
+            while (s.getValue() != 0) {
+                if (s.getValue() % 2 == 0) {
                     finalPrice += groceriesService.getByName(s.getKey()).getPrice();
-                else finalPrice += groceriesService.getByName(s.getKey()).getPrice()/2;
+                } else {
+                    finalPrice += groceriesService.getByName(s.getKey()).getPrice() / 2;
+                }
+                s.setValue(s.getValue() - 1);
             }
         }
         return finalPrice;
