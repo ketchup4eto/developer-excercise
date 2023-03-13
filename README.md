@@ -10,7 +10,7 @@ The used DB is MariaDB
 
 1. Clone the repo
 2. Generate or connect to a DB and use the SQL scripts to generate a table that will work with the API
-
+```
 create table groceries_shop.groceries
 (
     id    int auto_increment
@@ -19,5 +19,6 @@ create table groceries_shop.groceries
     price int                                                   not null,
     deal  enum ('NONE', 'TWOFORTHREE', 'BUYONEGETONEHALFPRICE') not null
 );
+```
 
 3. Enjoy! :)
