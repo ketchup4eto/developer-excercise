@@ -81,6 +81,13 @@ public class ShopTillServiceImpl implements ShopTillService {
         }
     }
 
+    /**
+     * This method takes a list of maximum 3 items that have the Two for three deal available and if there are 3 item compares them to figure out
+     * which item should be given for free
+     * @param items the list of items eligible for the promotion
+     * @return the total price of the items after applying the discount (if there have been enough items in the list)
+     */
+
     private int twoForThree(List<Groceries> items) {
         if (items.size() < 3) {
             int price = 0;
@@ -98,6 +105,13 @@ public class ShopTillServiceImpl implements ShopTillService {
             return items.get(0).getPrice() + items.get(1).getPrice();
         }
     }
+
+    /**
+     * This method takes an uncapped list and sorts the different items and counts them in a Map.
+     * Afterwards the method calculates the discount for every item that the promotion can be applied to
+     * @param items the items eligible for the promotion
+     * @return the total price of the items after applying the promotion as many times as possible
+     */
 
     private int buyOneGetOneHalfPrice(List<Groceries> items) {
         if (items.isEmpty())

@@ -58,11 +58,11 @@ public class GroceriesServiceImpl implements GroceriesService {
     }
 
     @Override
-    public Groceries update(Groceries item) {
+    public void update(Groceries item) {
         if (item.getPrice() <= 0) {
             throw new InvalidPriceFormatException("Price should be a positive number!");
         }
-        return repository.saveAndFlush(item);
+        repository.saveAndFlush(item);
     }
 
     @Override
