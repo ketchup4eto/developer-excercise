@@ -7,16 +7,15 @@ import com.exercise.cloudruid.utils.exceptions.GrocerieNotFoundException;
 import com.exercise.cloudruid.utils.exceptions.InvalidPriceFormatException;
 import com.exercise.cloudruid.utils.exceptions.ItemExistsException;
 import com.exercise.cloudruid.utils.mappers.GroceriesMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/groceries")
@@ -71,12 +70,16 @@ public class GroceriesRestController {
     }
 
     @PostMapping("/create/list")
-    public String createFromList(@RequestBody JSONArray itemList) {
+    public String createFromList(@RequestBody String itemList) {
         try {
-            JSONParser parser = new JSONParser(String.valueOf(itemList));
+            JSONParser parser = new JSONParser(itemList);
             List<Groceries> convertedList = new ArrayList<>();
+            GroceriesInOutDto dto = new GroceriesInOutDto();
+            ObjectMapper objectMapper = new ObjectMapper();
             for (Object o : parser.list()) {
-                GroceriesInOutDto dto = (GroceriesInOutDto) o;
+                Map map = objectMapper.convertValue(o, Map.class);
+                dto.setName(String.valueOf(map.get("name")));
+                dto.setPrice(String.valueOf(map.get("price")));
                 convertedList.add(groceriesMapper.dtoToGroceries(dto));
             }
 
@@ -89,6 +92,7 @@ public class GroceriesRestController {
         return "Items created successfully!";
     }
 
+    //TODO fix tomorrow
     @PutMapping("/update/{name}/{newPrice}")
     public String updatePrice(@PathVariable String name, @PathVariable String newPrice) {
         try {

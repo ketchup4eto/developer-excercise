@@ -3,12 +3,11 @@ package com.exercise.cloudruid.controllers;
 import com.exercise.cloudruid.services.contracts.ShopTillService;
 import com.exercise.cloudruid.utils.dtos.GroceriesInOutDto;
 import com.exercise.cloudruid.utils.exceptions.GrocerieNotFoundException;
+import com.exercise.cloudruid.utils.exceptions.ItemNotInCartException;
+import com.exercise.cloudruid.utils.helper.classes.Helpers;
 import com.exercise.cloudruid.utils.mappers.GroceriesMapper;
-import com.google.common.base.Functions;
-import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/till")
+@RequestMapping("/api/till/cart")
 public class ShopTillRestController {
 
     private final ShopTillService shopTillService;
@@ -28,37 +27,35 @@ public class ShopTillRestController {
         this.groceriesMapper = groceriesMapper;
     }
 
-    @GetMapping("/cart")
+    @GetMapping
     public List<GroceriesInOutDto> viewCart() {
         return shopTillService.viewCart().stream().map(groceriesMapper::groceriesToDto).toList();
     }
 
-    @PutMapping("/cart/add/{itemName}")
+    @PutMapping("/add/{itemName}")
     public String addToCart(@PathVariable String itemName) {
         try {
             shopTillService.addToCart(itemName);
         } catch (GrocerieNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
         return "Added to cart successfully";
     }
 
-    @PutMapping("/cart/remove/{itemName}")
+    @PutMapping("/remove/{itemName}")
     public String removeFromCart(@PathVariable String itemName) {
         try {
             shopTillService.removeFromCart(itemName);
-        } catch (GrocerieNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (ItemNotInCartException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
         return "Removed from cart successfully";
     }
 
-    @PutMapping("/cart/add/list")
-    public String scanListOfItems(@RequestBody JSONArray itemNames) {
+    @PutMapping("/add/list")
+    public String scanListOfItems(@RequestBody String itemNames) {
         try {
-            JSONParser parser = new JSONParser(itemNames.toString());
-            shopTillService.scanListOfItems(parser.list().stream()
-                    .map(Functions.toStringFunction()::apply).toList());
+            shopTillService.scanListOfItems(Helpers.parseJsonList(itemNames));
         } catch (ParseException e) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         } catch (GrocerieNotFoundException e) {
@@ -67,13 +64,13 @@ public class ShopTillRestController {
         return "Items added to cart successfully";
     }
 
-    @PutMapping("/cart/empty")
+    @PutMapping("/empty")
     public String emptyShoppingCart() {
         shopTillService.emptyShoppingCart();
         return "Cart has been emptied";
     }
 
-    @GetMapping("/cart/total")
+    @GetMapping("/total")
     public String totalCostOfCart() {
         try {
             return shopTillService.totalCostOfCart();
